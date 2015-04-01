@@ -88,6 +88,7 @@ namespace Microsoft.CodeAnalysis.ExpressionEvaluator
         private static ResultsViewExpansion CreateExpansion(DkmInspectionContext inspectionContext, DkmClrValue value, DkmClrType enumerableType, Formatter formatter)
         {
             var proxyValue = value.InstantiateResultsViewProxy(inspectionContext, enumerableType);
+            //var proxyValue = value.InstantiateDynamicViewProxy(inspectionContext);
             // InstantiateResultsViewProxy may return null
             // (if assembly is missing for instance).
             if (proxyValue == null)
@@ -100,7 +101,7 @@ namespace Microsoft.CodeAnalysis.ExpressionEvaluator
                 proxyValue.Type.GetLmrType(),
                 proxyValue,
                 ExpansionFlags.None,
-                TypeHelpers.IsPublic,
+                memberInfo => memberInfo.Name.Equals("Items"),
                 formatter);
             return new ResultsViewExpansion(proxyValue, proxyMembers);
         }

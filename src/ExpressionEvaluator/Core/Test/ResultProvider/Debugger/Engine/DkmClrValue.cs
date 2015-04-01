@@ -604,6 +604,34 @@ namespace Microsoft.VisualStudio.Debugger.Evaluation.ClrCompilation
             return this.InstantiateProxyType(inspectionContext, proxyType);
         }
 
+        public DkmClrValue InstantiateDynamicViewProxy(DkmInspectionContext inspectionContext)
+        {
+            if (inspectionContext == null)
+            {
+                throw new ArgumentNullException("inspectionContext");
+            }
+
+            var appDomain = this.Type.AppDomain;
+            var module = GetModule(appDomain, "Microsoft.CSharp.dll");
+            if (module == null)
+            {
+                return null;
+            }
+            
+            DkmClrType proxyType;
+            try
+            {
+                proxyType = module.ResolveTypeName("Microsoft.CSharp.RuntimeBinder.DynamicMetaObjectProviderDebugView", ArrayBuilder<DkmClrType>.GetInstance(0).ToImmutableAndFree());//new ReadOnlyCollection<DkmClrType>(new List<DkmClrType> { }));
+            }
+            catch (ArgumentException)
+            {
+                // ResolveTypeName throws ArgumentException if type is not found.
+                return null;
+            }
+
+            return this.InstantiateProxyType(inspectionContext, proxyType);
+        }
+
         private static DkmClrModuleInstance GetModule(DkmClrAppDomain appDomain, string moduleName)
         {
             var modules = appDomain.GetClrModuleInstances();
